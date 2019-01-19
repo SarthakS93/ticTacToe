@@ -17,68 +17,114 @@
 * 
 */
 
+// import { alertDialog } from "./ticTacToeLogic";
+
 const grid = [];
 const GRID_LENGTH = 3;
 let turn = 'X';
+let isGameOver = false, winner = "", numberOfMovesPlayed = 0;
 
+// this function will initialize a grid of 3x3 with 0 values
 function initializeGrid() {
-    for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
+    for (let rowIdx = 0; rowIdx < GRID_LENGTH; rowIdx++) {
         const tempArray = [];
-        for (let rowidx = 0; rowidx < GRID_LENGTH;rowidx++) {
+        for (let colIdx = 0; colIdx < GRID_LENGTH; colIdx++) {
             tempArray.push(0);
         }
         grid.push(tempArray);
     }
 }
 
-function getRowBoxes(colIdx) {
-    let rowDivs = '';
+// get the row content for column id that's given
+function getRowBoxes(rowIdx) {
+    let rowDiv = '';
     
-    for(let rowIdx=0; rowIdx < GRID_LENGTH ; rowIdx++ ) {
+    for(let colIdx = 0; colIdx < GRID_LENGTH ; colIdx++ ) {
         let additionalClass = 'darkBackground';
         let content = '';
-        const sum = colIdx + rowIdx;
-        if (sum%2 === 0) {
+        const sum = rowIdx + colIdx;
+        if (sum % 2 === 0) {
             additionalClass = 'lightBackground'
         }
-        const gridValue = grid[colIdx][rowIdx];
+        const gridValue = grid[rowIdx][colIdx];
         if(gridValue === 1) {
             content = '<span class="cross">X</span>';
         }
         else if (gridValue === 2) {
             content = '<span class="cross">O</span>';
         }
-        rowDivs = rowDivs + '<div colIdx="'+ colIdx +'" rowIdx="' + rowIdx + '" class="box ' +
+        rowDiv = rowDiv + '<div rowIdx="'+ rowIdx +'" colIdx="' + colIdx + '" class="box ' +
             additionalClass + '">' + content + '</div>';
     }
-    return rowDivs;
+    return rowDiv;
 }
 
-function getColumns() {
-    let columnDivs = '';
-    for(let colIdx=0; colIdx < GRID_LENGTH; colIdx++) {
-        let coldiv = getRowBoxes(colIdx);
-        coldiv = '<div class="rowStyle">' + coldiv + '</div>';
-        columnDivs = columnDivs + coldiv;
+// get the whole grid html
+function getGridContent() {
+    let gridContent = '';
+    for(let rowIdx = 0; rowIdx < GRID_LENGTH; rowIdx++) {
+        let rowDiv = getRowBoxes(rowIdx);
+        rowDiv = '<div class="rowStyle">' + rowDiv + '</div>';
+        gridContent += rowDiv;
     }
-    return columnDivs;
+    return gridContent;
 }
 
+// render the grid
 function renderMainGrid() {
     const parent = document.getElementById("grid");
-    const columnDivs = getColumns();
-    parent.innerHTML = '<div class="columnsStyle">' + columnDivs + '</div>';
+    const gridContent = getGridContent();
+    parent.innerHTML = '<div class="columnsStyle">' + gridContent + '</div>';
 }
 
+// when user clicks on box
 function onBoxClick() {
+    // console.log("Inside onBoxClick");
     let rowIdx = this.getAttribute("rowIdx");
     let colIdx = this.getAttribute("colIdx");
-    let newValue = 1;
-    grid[colIdx][rowIdx] = newValue;
-    renderMainGrid();
-    addClickHandlers();
+
+    // console.log("row: " + rowIdx + " - col: " + colIdx);
+    if (grid[rowIdx][colIdx] === 0 && !isGameOver) {
+        // console.log("processing user's move");
+        let newValue = 2;
+        grid[rowIdx][colIdx] = newValue;
+        numberOfMovesPlayed++;
+
+        if (numberOfMovesPlayed === 9 && winner === "") {
+            alert("Game Tied");
+            setIsGameOver("Tie");
+        }
+
+        if (!checkForWinner()) {
+            // AI move
+            getComputersMove();
+            numberOfMovesPlayed++;
+            checkForWinner();
+        }
+
+        renderMainGrid();
+        addClickHandlers();
+        
+    }
+    else if (isGameOver){
+        alert(winner === "Tie" ? "Game Tied" : winner + " has already won");
+    }
 }
 
+function getComputersMove() {
+    let bestMove = processNextMove();
+    if (bestMove.row !== -1 && bestMove.col !== -1) {
+        // console.log("Making AI move");
+        grid[bestMove.row][bestMove.col] = 1;
+    }
+}
+
+function setIsGameOver(winnerName) {
+    isGameOver = true;
+    winner = winnerName;
+}
+
+// add click handler to each box
 function addClickHandlers() {
     let boxes = document.getElementsByClassName("box");
     for (let idx = 0; idx < boxes.length; idx++) {
