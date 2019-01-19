@@ -71,8 +71,8 @@ function renderMainGrid() {
 }
 
 function onBoxClick() {
-    var rowIdx = this.getAttribute("rowIdx");
-    var colIdx = this.getAttribute("colIdx");
+    let rowIdx = this.getAttribute("rowIdx");
+    let colIdx = this.getAttribute("colIdx");
     let newValue = 1;
     grid[colIdx][rowIdx] = newValue;
     renderMainGrid();
@@ -80,8 +80,8 @@ function onBoxClick() {
 }
 
 function addClickHandlers() {
-    var boxes = document.getElementsByClassName("box");
-    for (var idx = 0; idx < boxes.length; idx++) {
+    let boxes = document.getElementsByClassName("box");
+    for (let idx = 0; idx < boxes.length; idx++) {
         boxes[idx].addEventListener('click', onBoxClick, false);
     }
 }
